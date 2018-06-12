@@ -1,0 +1,3 @@
+[submodule "svg3d"]
+	path = svg3d
+	url = https://github.com/SeHoonYang/svg3d.git
