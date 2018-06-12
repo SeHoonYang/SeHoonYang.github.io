@@ -1,11 +1,40 @@
 <!DOCTYPE html>
+<html>
 <head>
 	<title>SeHoonYang.github.io</title>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
 	<script src="svg3d/gl-matrix.min.js"></script>
 	<script src="svg3d/svg3d.js"></script>
 </head>
 <body>
-	<div id="viewportContainer">
+	<!-- header -->
+	<header class="container-fluid bg-secondary">
+		<h5 class="text-white py-4">SeHoonYang.github.io</h5>
+	</header>
+	<!-- body -->
+	<div class="container">
+		<div class="row">
+			<div class="col-6">
+				<h5 class="text-dark">svg3d library</h5>
+				<h6 class="text-secondary">svg3d library is a 3D graphics library written in javascript. It is designed to handle small number of vertices. If you want better performance, consider using webGL or webGL based libraries.</h6>
+			</div>
+			<div class="col">
+				<div id="viewportContainer">
+				</div>
+			</div>
+			<div class="col">
+				<button type="button" class="btn btn-block btn-outline-dark" onClick="bunny.setVertexShader(context.defaultVertexShader)">Default vertex shader</button>
+				<button type="button" class="btn btn-block btn-outline-dark" onClick="bunny.setVertexShader(NormalColorShader)">Normal vertex shader</button>
+				<button type="button" class="btn btn-block btn-outline-primary" onClick="context.createPointLight([Math.random()*20-10,Math.random()*20-10,Math.random()*20-10], Math.random() * 0xFFFFFF, Math.random())">Add random light</button>
+				<button type="button" class="btn btn-block btn-outline-primary" onClick="context.lightList = [];">Clear all lights</button>
+			</div>
+		</div>
 	</div>
 	<script src="object.js"></script>
 	<script src="svg.js"></script>
