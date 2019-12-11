@@ -356,7 +356,7 @@ function loadCommon(name, list, settingFunction){
 	totalModel++;
 	
 	loader.load(
-		'/models/' + name + '.glb',
+		'/static/models/' + name + '.glb',
 		function (glb) {
 			list[name] = settingFunction(glb);
 			
@@ -379,7 +379,7 @@ function loadCommon(name, list, settingFunction){
 
 function loadInstancingCommon(name, settingFunction, callback){
 	loader.load(
-		'/models/' + name + '.glb',
+		'/static/models/' + name + '.glb',
 		function (glb) {
 			callback(settingFunction(glb));
 		},
