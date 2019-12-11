@@ -103,6 +103,14 @@ function loadAll(list) {
 	loadGrill(list);
 	loadCheese(list);
 	loadCarrot(list);
+	
+	loadEggTower(function(){});
+	loadGoldTower(function(){});
+	loadHoduckTower(function(){});
+	loadBurgerTower(function(){});
+	loadPizzaTower(function(){});
+	loadOrangeTower(function(){});
+	loadSteakTower(function(){});
 }
 
 function loadIndicator(list) {
