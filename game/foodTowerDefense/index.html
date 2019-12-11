@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Food Tower Defense</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+		<link rel="stylesheet" href="./static/css/style.css">
+	</head>
+	<body>
+		<div class="left-panel">
+			<div class="game-intro-header py-3 bg-secondary text-light">
+				<h5>Food Tower</h5>
+				<h5>Defense</h5>
+			</div>
+			<br />
+			<center><h5>Wave <span id="wave"></span></h5></center>
+			<hr>
+			<div class="panel-header">
+				<div class="progress mb-2 progress-custom">
+					<div class="progress-bar progress-bar-striped bg-danger progress-bar-animated" style="width:100%" id="life"><span id="ui-life-text">Life</span> : 100</div>
+				</div>
+				<h5><span id="ui-money-text">예산</span> : <span id="money" class="float-right"></span></h5>
+			</div>
+			<hr>
+			<div class="menu-panel mx-3">
+				<button class="btn btn-primary btn-hover" onclick="buildTowerPanelMenu()" id="ui-build-text"></button>
+				<button class="btn btn-secondary btn-hover" onclick="buildSystemPanelMenu()" id="ui-setting-text"></button>
+			</div>
+			<hr class="panel-splitter">
+			<div id="tower-panel-area-wrap">
+				<div id="tower-panel-area">
+				</div>
+			</div>
+		</div>
+		<div id="threeArea" class="threeArea">
+			<div id="startDim" class="dim"></div>
+			<button id="diff0" class="btn btn-success diff-btn" onclick="setDiffEasy()" style="left: calc(50% - 200px)"></button>
+			<button id="diff1" class="btn btn-primary diff-btn" onclick="setDiffNoraml()"></button>
+			<button id="diff2" class="btn btn-danger diff-btn" onclick="setDiffHard()" style="left: calc(50% + 80px)"></button>
+			<button id="start" class="btn btn-primary start-btn" disabled onclick="startGame()"></button>
+		</div>
+		<div id="announce" class="announce d-none"></div>
+		<div id="stat-info"></div>
+		<div id="tooltip-area"></div>
+		<div id="healthbar-area"></div>
+		<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-auth.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-database.js"></script>
+		<script src="./static/script/data.js"></script>
+		<script src="./static/script/three.min.js"></script>
+		<script src="./static/script/gltfLoader.js"></script>
+		<script src="./static/script/resourceLoader.js"></script>
+		<script src="./static/script/object.js"></script>
+		<script src="./static/script/gameLogic.js"></script>
+		<script src="./static/script/construct.js"></script>
+		<script src="./static/script/ui.js"></script>
+		<script src="./static/script/firebase.js"></script>
+		<script>
+			const scene = new THREE.Scene();
+			const unitGroup = new THREE.Group();
+			
+			scene.add(unitGroup);
+			
+			scene.background = new THREE.Color(0x7cacff);
+			var alertRemTime = 0;
+			var panelRemTime = 0;
+
+			const camera = new THREE.PerspectiveCamera(75, document.getElementById("threeArea").offsetWidth / window.innerHeight, 0.1, 1000);
+			camera.position.set(0, 0, 10);
+			
+			var backgroundGeometry;
+			
+			const raycaster = new THREE.Raycaster();
+	
+			const modelList = {};
+			var loadingComplete = false;
+			
+			const renderer = constructScene(scene);
+			renderer.setSize(document.getElementById("threeArea").offsetWidth, window.innerHeight);
+			document.getElementById("threeArea").appendChild(renderer.domElement);
+			
+			loadAll(modelList);
+			
+			var panelTargetEnemy = null;
+			var panelTargetTower = null;
+			const moneyDom = document.getElementById('money');
+			const lifeDom = document.getElementById('life');
+			const waveDom = document.getElementById('wave');
+			const panelDom = document.getElementById('stat-info');
+			const healthBarDom = document.getElementById("healthbar-area");
+			var targetObject = null;
+			function animate() {
+				const currentTime = Date.now();
+				const deltaTime = currentTime - lastTime;
+				lastTime = currentTime;
+				
+				requestAnimationFrame(animate);
+				
+				if(!paused){
+					logicLoop(deltaTime);
+					raycaster.setFromCamera(mouse, camera);
+					const intersection = raycaster.intersectObject(backgroundGeometry);
+					setConstructPlane(intersection[0].point);
+					
+					const enemyIntersection = raycaster.intersectObjects(unitGroup.children, true);
+					if(enemyIntersection[0]) {
+						var targetChild = enemyIntersection[0].object;
+						
+						while(targetChild.etObject == null) {
+							targetChild = targetChild.parent;
+						}
+					
+						targetObject = targetChild.etObject;
+						
+						panelDom.style.opacity = 0.8;
+						panelDom.style.display = "block";
+						panelRemTime = 3000;
+					}
+					
+					if(targetObject != null) {
+						if(targetObject.constructor.name == "Enemy" && !targetObject.invincible) {
+							if(panelTargetEnemy == null)
+								panelDom.innerHTML = getEnemyPanelHTML();
+								
+							panelTargetEnemy = targetObject
+							displayEnemyUI(panelTargetEnemy);
+							
+							panelTargetTower= null;
+						} else if (targetObject.constructor.name == "Tower") {
+							if(panelTargetTower == null)
+								panelDom.innerHTML = getTowerPanelInfoHTML();
+								
+							panelTargetTower = targetObject
+							displayTowerUI(panelTargetTower);
+							
+							panelTargetEnemy = null;
+						}
+					}
+					
+					moneyDom.innerHTML = money;
+					waveDom.innerHTML = level;
+					lifeDom.innerHTML = "Life : " + life;
+					lifeDom.style.width = life + "%";
+				}
+				
+				renderer.render(scene, camera);
+				
+				panelRemTime -= deltaTime;
+				if(panelRemTime <= 0) {
+					panelDom.style.opacity = 0;
+				}
+				alertRemTime -= deltaTime;
+				if(alertRemTime <= 0) {
+					document.getElementById("announce").classList.add("d-none");
+				}
+			}
+			
+			createConstPlane(scene);
+			
+			var lastTime = Date.now();
+			animate();
+		</script>
+	</body>
+</html>
