@@ -377,7 +377,7 @@ const waveInfo = [
 			{name:"cheese", invincible:false, big:false, gold: 2, damage:3, health:100, def:0, speed:3, timing:10, count:20, path:[{x:3,y:-5},{x:3,y:-3},{x:2,y:-3},{x:2,y:-1},{x:4,y:-1},{x:4,y:3},{x:5,y:3}]}
 		]
 	},
-	{maxCount:40, wave:[
+	{maxCount:30, wave:[
 			{name:"indicator", invincible:true, big:false, gold: 0, damage:0, health:1, speed:10, timing:0, count:1, path:[{x:-3,y:5},{x:-3,y:-3},{x:0,y:-3},{x:0,y:-1},{x:-1,y:-1},{x:-1,y:3},{x:4,y:3},{x:4,y:-1},{x:2,y:-1},{x:2,y:-3},{x:3,y:-3},{x:3,y:-5}]},
 			{name:"indicator", invincible:true, big:false, gold: 0, damage:0, health:1, speed:10, timing:20, count:1, path:[{x:5,y:3},{x:4,y:3},{x:4,y:-1},{x:2,y:-1},{x:2,y:-3},{x:3,y:-3},{x:3,y:-5}]},
 			
