@@ -4,3 +4,6 @@
 [submodule "game/foodTowerDefense"]
 	path = game/foodTowerDefense
 	url = https://github.com/SeHoonYang/FoodTowerDefense
+[submodule "game/dodge"]
+	path = game/dodge
+	url = https://github.com/SeHoonYang/SimpleDodge.git
