@@ -7,3 +7,6 @@
 [submodule "game/dodge"]
 	path = game/dodge
 	url = https://github.com/SeHoonYang/SimpleDodge.git
+[submodule "game/SlidePuzzle"]
+	path = game/SlidePuzzle
+	url = https://github.com/SeHoonYang/SlidePuzzle.git
