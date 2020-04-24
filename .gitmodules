@@ -10,3 +10,6 @@
 [submodule "game/SlidePuzzle"]
 	path = game/SlidePuzzle
 	url = https://github.com/SeHoonYang/SlidePuzzle.git
+[submodule "game/dotConnector"]
+	path = game/dotConnector
+	url = https://github.com/SeHoonYang/dotConnector
