@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		html {
+			height:100%;
+			overflow:hidden;
+		}
+		body {
+			height:100%;
+			justify-content: center;
+			flex-direction: column;
+			display:flex;
+		}
+		table {
+			margin:auto;
+		}
+		td {
+			width:64px;
+			height:64px;
+			border: 1px #dfdfdf solid;
+			border-radius: 4px;
+			background:#f2f3f4;
+		}
+		td:hover {
+			background:#fafbfc;
+		}
+		.dot {
+			border-radius: 50%;
+			width:24px;
+			height:24px;
+			display:block;
+			margin:auto;
+			pointer-events:none;
+			animation-duration: 0.5s;
+			animation-name: sway;
+		}
+		.body {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		@keyframes sway {
+			from {
+				width:8px;
+				height:8px;
+			}
+			60% {
+				width:28px;
+				height:28px;
+			}
+			to {
+				width:24px;
+				height:24px;
+			}
+		}
+		.board {
+			position:absolute;
+			top: 30px;
+			left: calc(50% - 70px);
+			font-size:24px;
+		}
+		#startBtn {
+			position:absolute;
+			width: 240px;
+			height:160px;
+			top: calc(50% - 80px);
+			left: calc(50% - 120px);
+			background: #3a3bff;
+			border-radius: 16px;
+			display: flex;
+			justify-content: center;
+			flex-direction: column;
+			color:white;
+			font-size: 24px;
+		}
+	</style>
+</head>
+<body>
+<div class="board">
+<p>Rem Time : <span id="time">0</span></p>
+<p>Score :<span id="score">0</span> </p>
+</div>
+<div id="startBtn" onclick="startGame();">
+<span style="margin:auto;pointer-events:none;">START</span>
+</div>
+<table id="mainTable">
+</table>
+<script>
+	// class 0 for start / end 1 for temp-end, 2 for normal, 3 for nothing, 4 for invisible cell
+	var clicked = undefined;
+	var originClicked = undefined;
+	var pathArray = [];
+	var pathes = {};
+	const colorSet = ["pink", "rebeccapurple", "salmon", "aquamarine", "wheat", "tomato", "teal", "steelblue", "coral", "darkorange", "moccasin", "darkkhaki", "lime", "olive", "turquoise"];
+	var round_x;
+	var round_y;
+	var round_max_length = 5;
+	var round = 1;
+	var remTime = 0;
+	var score = 0;
+
+	document.onmouseup = mouseuped;
+
+	function mouseuped(event) {
+		clicked = undefined;
+
+		 clearPath(pathArray);
+	}
+
+	function clearPath(pathArray) {
+		const length = pathArray.length;
+
+		if(length > 0) {
+			pathArray[0].dataset.reached = "0";
+		}
+		for(let i = 1; i < length - 1; i++) {
+			pathArray[i].dataset.class = "3";
+			pathArray[i].innerHTML = "";
+		}
+
+		if(length > 1) {
+			if (pathArray[length - 1].dataset.class == "0") {
+				pathArray[length - 1].dataset.reached = "0";
+			} else {
+				pathArray[length - 1].dataset.class = "3";
+				pathArray[length - 1].innerHTML = "";
+			}
+		}
+	}
+
+	function attachEventListener() {
+		const cells = document.getElementsByTagName("td");
+		for(let i in cells) {
+			cells[i].onmousedown = mousedowned;
+			cells[i].onmouseover = mouseovered;
+			cells[i].onmousemove = mousemoved;
+		}
+	}
+
+	function mousemoved(event) {
+		event.preventDefault();
+	}
+
+	function mouseovered(event) {
+		event.preventDefault();
+
+		const target = event.target;
+
+		if(!clicked || clicked.innerHTML == "" || (clicked.dataset.class != "0" && clicked.dataset.class != "1") || originClicked == target)
+			return;
+
+		if (isNeighbor(clicked, target) && (target.dataset.class == "3" || (target.dataset.class == "0" && target.dataset.sn == originClicked.dataset.sn))) {
+			pathArray.push(target);
+
+			if (target.dataset.class == "0" && target != clicked) {
+				// reached
+				pathes[target.dataset.sn] = pathArray;
+				pathArray = [];
+				target.dataset.reached = "1";
+				originClicked .dataset.reached = "1";
+				clicked = undefined;
+				originClicked = undefined;
+				checkSuccess(round_x * round_y);
+				return;
+			}
+
+			target.innerHTML = clicked.innerHTML;
+
+			if (clicked.dataset.class == "1") {
+				clicked.dataset.class = "2";
+			}
+			if (target.dataset.class == "3") {
+				target.dataset.class = "1";
+			}
+			clicked = target;
+		}
+	}
+
+	function mousedowned(event) {
+		event.preventDefault();
+
+		if (event.target.innerHTML=="")
+			return;
+
+		if (event.target.dataset.reached == "1") {
+			// remove path
+			clearPath(pathes[event.target.dataset.sn]);
+			delete pathes[event.target.dataset.sn];
+		}
+
+		clicked = event.target;
+		originClicked = event.target;
+		 pathArray = [];
+		pathArray.push(clicked);
+	}
+
+	function isNeighbor(r, l) {
+
+		if (r.dataset.x == l.dataset.x && parseInt(r.dataset.y) - 1 == parseInt(l.dataset.y)) {
+			return true;
+		}
+		else if (parseInt(r.dataset.x) + 1 == parseInt(l.dataset.x) && r.dataset.y == l.dataset.y) {
+			return true;
+		}
+		else if (r.dataset.x == l.dataset.x && parseInt(r.dataset.y) + 1 == parseInt(l.dataset.y)) {
+			return true;
+		}
+		else if (parseInt(r.dataset.x) -+ 1 == parseInt(l.dataset.x) && r.dataset.y == l.dataset.y) {
+			return true;
+		}
+
+		return false;
+	}
+	
+	function getRandomCell (cell, x, y) {
+		const i = Math.floor(Math.random() * y);
+		const j = Math.floor(Math.random() * x);
+		
+		if(cell[i][j] == undefined)
+			return [i,j];
+		else
+			return getRandomCell (cell, x, y);
+	}
+	
+	function traverse(cell, maxx, maxy, x, y, dot_sn, max_length) {
+		
+		var cnt = 0;
+		var last_point = undefined;
+		var current_x = x;
+		var current_y = y;
+		
+		while(true) {
+			const canGo = [];
+			
+			if(current_x - 1 >= 0 && cell[current_y][current_x - 1] == undefined)
+				canGo.push([current_x - 1, current_y]);
+			if(current_x + 1 < maxx && cell[current_y][current_x + 1] == undefined)
+				canGo.push([current_x + 1, current_y]);
+			if(current_y - 1 >= 0 && cell[current_y - 1][current_x] == undefined)
+				canGo.push([current_x, current_y - 1]);
+			if(current_y + 1 < maxy && cell[current_y + 1][current_x] == undefined)
+				canGo.push([current_x, current_y + 1]);
+			
+			if(canGo.length == 0 || cnt >= max_length) {
+				if(cnt > 0)
+					last_point.class = 0;
+				else
+					cell[y][x] = {sn:dot_sn, class:4};
+					
+				return cnt;
+			} else {
+				const newPoint = canGo[Math.floor(Math.random() * canGo.length)];
+				cell[newPoint[1]][newPoint[0]] = {sn:dot_sn, class:3};
+				last_point = cell[newPoint[1]][newPoint[0]];
+				current_x = newPoint[0];
+				current_y = newPoint[1];
+				cnt++;
+			}
+		}
+	}
+	
+	function generatePanel(x, y) {
+		var html = "";
+		const dataCell = [];
+		
+		for(let i = 0; i < y; i++) {
+			dataCell.push(new Array(x));
+		}
+		
+		var total_cnt = 0;
+		const target_cnt = x * y;
+		var dot_cnt = 0;
+		
+		// making dots
+		while(total_cnt != target_cnt) {
+			const point = getRandomCell(dataCell, x, y);
+			dataCell[point[0]][point[1]] = {sn:dot_cnt, class:0};
+			total_cnt += traverse(dataCell, x, y, point[1], point[0], dot_cnt, round_max_length) + 1;
+			dot_cnt++;
+		}
+		
+		const colorOffset = Math.floor(Math.random() * colorSet.length);
+		
+		for(let i = 0 ; i < y; i++) {
+			html += "<tr>";
+			for(let j = 0; j < x; j++) {
+				const cell = dataCell[i][j];
+				
+				if(cell.class == 4)
+					html += "<td data-x='" + j + "' data-y='" + i + "' data-class='4' style='opacity:0'></td>";
+				else if(cell.class == 3)
+					html += "<td data-x='" + j + "' data-y='" + i + "' data-class='3'></td>";
+				else if(cell.class == 0)
+					html += "<td data-x='" + j + "' data-y='" + i + "' data-class='0' data-reached='0' data-sn='" + cell.sn + "'><i class='dot' style='background:" + colorSet[(cell.sn + colorOffset) % colorSet.length] + "'></i></td>";
+			}
+			html += "</tr>";
+		}
+		
+		round_x = x;
+		round_y = y;
+	
+		document.getElementById('mainTable').innerHTML = html;
+		attachEventListener();
+	}
+	
+	function checkSuccess(size) {
+		const tags = document.getElementsByTagName("td");
+		for(let i = 0; i < size ; i++) {
+			const cell = tags[i];
+			if(cell.dataset.class == "3")
+				return false;
+		}
+		
+		setTimeout(startNextRound, 300);
+		return;
+	}
+	
+	function startNextRound() {
+		round_x = Math.floor(round / 4) + 3;
+		round_y = Math.floor(round / 4) + 3;
+		round_max_length = Math.floor(round / 2) + 2;
+		round++;
+		score += remTime / 100;
+		document.getElementById("score").innerHTML = score;
+		
+		generatePanel(round_x, round_y);
+		remTime += 5 * 1000;
+		document.getElementById("time").innerHTML = Math.floor(remTime / 1000);
+	}
+	
+	function startGame() {
+		startNextRound();
+		document.getElementById("startBtn").style.display = "none";
+		const id = setInterval(function(){
+			document.getElementById("time").innerHTML = Math.floor((remTime - 500) / 1000);
+			remTime -= 500;
+			if(remTime <= 0) {
+				// Game Over
+				
+				const cells = document.getElementsByTagName("td");
+				for(let i in cells) {
+					cells[i].onmousedown = undefined;
+					cells[i].onmouseover = undefined;
+					cells[i].onmousemove = undefined;
+				}
+				
+				document.getElementById("mainTable").innerHTML = "";
+				document.getElementById("startBtn").style.display = "flex";
+				clearInterval(id);
+			}
+		}, 500);
+	}
+</script>
+</body>
+</html>
