@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>💒영민셀 골든벨🔔 시뮬레이터</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap" rel="stylesheet">
+        <style>
+            html, body {
+                height: 100%;
+            }
+            .btn-blue {
+                background-color: rgb(71, 114, 255);
+                border: none;
+                border-radius: 8px;
+                padding: 6px 8px 6px 8px;
+                color: white;
+            }
+            .w50 {
+                width: 50%;
+                text-align: center;
+                align-items: center;
+                align-content: center;
+                text-align: -webkit-center;
+            }
+            .w75 {
+                width: 75%;
+                text-align: center;
+                align-items: center;
+                align-content: center;
+                text-align: -webkit-center;
+            }
+            .w100 {
+                width: 100%;
+                text-align: center;
+                align-items: center;
+                align-content: center;
+                text-align: -webkit-center;
+            }
+            .h100 {
+                height: 100%;
+                vertical-align: middle;
+                align-items: center;
+                align-content: center;
+                text-align: center;
+            }
+            .question-text {
+                font-family: "Nanum Myeongjo", serif;
+                font-weight: 600;
+                font-style: normal;
+                background-color: #f0f0f0;
+                border-radius: 8px;
+                padding: 24px;
+                color: #1e1e1e;
+                line-height: 24px;
+            }
+            .answers {
+                font-size: 14px;
+                margin-right: 14px;
+            }
+            .answers-container {
+                text-align: -webkit-left;
+            }
+            .margin2 {
+                margin: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="start" class="h100">
+            <h2 class="w100">💒영민셀 골든벨🔔</h2>
+            <div class="w100">
+                <input type="checkbox" id="shuffle" /><h4 style="display: -webkit-inline-box;">문제 순서 섞기</h4>
+            </div>
+            <button class="btn-blue w75" onclick="onclickStart()">시작🎈</button>
+        </div>
+        <div id="questions" style="display:none" class="h100">
+            <h2 class="w100">💒영민셀 골든벨🔔</h2>
+            <h3 id="question_number" style="margin:0px">#1</h3>
+            <div class="w100">
+                <h4 id="question_text" class="question-text w75"></h4>
+            </div>
+            <ol class="w75 answers-container" id="answers">
+            </ol>
+            <br />
+            <button class="btn-blue w75" onclick="checkAnswer()" tabindex="-1">정답 확인🎯</button>
+        </div>
+    </body>
+    <script>
+        var question_counter = 0;
+        var answer_counter = 0;
+        var current_question
+
+        const data = [
+            {date:"7월1일",  from:"잠언 2:1-15", text:"여호와 경외하기를 깨닫기 위해 우리는 무엇을 구하는 것 같이 지혜를 구하고, 무엇을 찾는 것 같이 지혜를 찾아야 할까요?", answer:["은", "감추어진 보배"]},
+            {date:"7월2일",  from:"민수기 22~24", text:"발락이 이스라엘 저주를 위해 발람을 데려간 장소는 어디일까요?", answer:["바알의 산당", "비스가 꼭대기", "브올 산 꼭대기"]},
+            {date:"7월3일",  from:"시편 103:1-22", text:"여호와의 인자하심은 무엇(1)을 지키고 무엇(2)을 기억하여 행하는 사람에게 이를까요?", answer:["그의 언약", "그의 법도"]},
+            {date:"7월4일",  from:"레위기 18:24-30", text:"여호와께서는 이스라엘 백성에게, 레위기 18장에 나오는 '가증한 모든 일'을 만일 그들이 행하게 된다면\n'그 땅에서 토하여냄(쫓겨남)'과 동시에 또 <어떠한 결과>를 맞게 될 것이라 말씀하시나요?", answer:["그 백성중에 끊어지리라"]},
+            {date:"7월5일",  from:"로마서 5", text:"우리는 믿음으로 의롭다하심을 받아 환난 중에도 즐거워합니다. 환난은 (1)을 (1)은 연단을, 연단은 (2)를 이루는 줄 알기 때문일까요?", answer:["인내", "소망"]},
+            {date:"7월6일",  from:"데살로니가전서 1", text:"데살로니가 교인들이 환난 가운데 주님을 본받을 수 있었던 것은, 무엇을 기쁨으로 받았기 때문일까요?", answer:["성령의 기쁨"]},
+            {date:"7월7일",  from:"시편 9", text:"시편 9편에 따르면, 여호와 하나님의 이름을 아는 자는 주를 의지한다고 적혀 있습니다. 그들이 하나님을 의지할 수 있는 이유는 하나님께서는 주를 찾는 자들을 결코 ○○○ 아니하시기 때문입니다.", answer:["버리지"]},
+            {date:"7월8일",  from:"시편 89", text:"주의 팔은 능력이 있고 주의 손은 강합니다. 높이 들리우신 것은 무엇일까요?", answer:["주의 오른손"]},
+            {date:"7월9일",  from:"하박국 3", text:"선지자 하박국은 누구로 인해 즐거워하고 기뻐한다고 말하고 있나요?", answer:["여호와 하나님"]},
+            {date:"7월10일",  from:"베드로전서 1:1-12", text:"베드로는 믿음의 결과로 무엇을 얻는다고 하나요? (힌트! ○○의 ○○)", answer:["영혼의 구원"]},
+            {date:"7월11일",  from:"신명기 7", text:"신명기 7장 21절에서 하나님은 이스라엘 백성에게 왜 두려워 하지 말라고 하시나요?", answer:["너희의 하나님 여호와 곧 크고 두려운 하나님이 너희 중에 계심이니라"]},
+            {date:"7월12일",  from:"마가복음 9:14-29", text:"말 못하게 귀신 들린 아들을 예수님께 데려왔을 때 아이의 아버지는 '하실 수 있거든 도와주소서'라고 말합니다. 이 때 예수님이 하신 말씀은 무엇일까요?", answer:["할 수 있거든이 무슨 말이냐 믿는 자에게는 능히 하지 못할 일이 없느니라"]},
+            {date:"7월13일",  from:"히브리서 11", text:"하나님을 기쁘시게 하려면 믿음이 있어야 한다고 히브리서의 저자는 말합니다. 하나님께 나아가는 자가 반드시 믿어야 하는 2가지는 무엇일까요?", answer:["하나님이 계신 것", "하나님이 자기를 찾는 자들에게 상 주시는 이심"]},
+            {date:"7월14일",  from:"신명기 5", text:"신명기 5장에 따르면, 하나님을 ○○하며. 말씀하신 모든 명령을 ○○는 자에게 그들과 그의 자손이 영원히 복 받기를 원하신다고 말씀하십니다.", answer:["경외하며", "지키"]},
+            {date:"7월15일",  from:"고린도전서 8", text:"믿음이 약한 자들의 양심이 담력을 얻어 우상의 제물을 먹게 되는 지식 있는 사람의 행동은 무엇인가요?", answer:["지식 있는 네가 우상의 전에 앉아 먹는 것"]},
+            {date:"7월16일",  from:"시편 39", text:"다윗은 하나님에게 자신을 무엇이라 칭하나요?", answer:["나그네"]},
+            {date:"7월17일",  from:"레위기 18:24-30", text:"사무엘은 여호와의 말에 순종하지않은 거역하는 것은 ○○○ 죄와 같고 완고한 것은 사신 우상에게 절하는 죄와 같다고 하였습니다. 이 죄는 어떤 죄일까요?", answer:["점치는"]},
+            {date:"7월18일",  from:"로마서 6", text:"우리는 죄에 대하여는 죽은 사람입니다. 다만 하나님께 대하여는 '무엇' 안에서 살아 있는 자로 여겨야 하나요?", answer:["그리스도 예수"]},
+            {date:"7월19일",  from:"고린도전서 15장", text:"고린도전서 15장에서는 사랑하는 형제들에게 견실하며 흔들리지 말고 항상 주의 일에 힘쓰는 자들이 되라고 얘기합니다. 이는 우리의 ○○가 주 안에서 헛되지 않은줄 우리가 알기 때문입니다. ○○은 무엇일까요?", answer:["수고"]},
+            {date:"7월20일",  from:"잠언 3", text:"잠언 3장의 저자는 젊은이들에게 스스로를 ○○롭게 여기지 말고 마음을 다해 여호와를 신뢰할 것을 당부합니다.", answer:["지혜"]},
+            {date:"7월21일",  from:"창세기 28", text:"야곱은 하나님께서 그와 함께 계셔서, 그를 지키시고, 그에게 먹을 떡과 입을 옷을 주시며 평안히 아버지 집으로 돌아가게 하신다면, 하나님께서 자신에게 주신 모든 것의 ○○○○을 하나님께 반드시 드릴 것을 서원합니다.", answer:["십분의 일"]},
+            {date:"7월22일",  from:"욥기 1", text:"우스 땅에 사는 욥에게는 아들과 딸이 각각 몇 명일까요?", answer:["아들 일곱과 딸 셋"]},
+            {date:"7월23일",  from:"이사야 50:4-11", text:"흑암 중에 행하여 빛이 없는 자라도 우리가 끝까지 지켜야 할 본분은 무엇인가요?", answer:["여호와의 이름을 의지하고 하나님을 믿는것"]},
+            {date:"7월24일",  from:"출 23:1-9", text:"하나님은 모세에게 여러 가지 규례를 전달하였습니다. 그 중 원수의 길 잃은 동물을 보거든 반드시 원수에게 돌려보내라고 하셨는데, 여기서 이 동물들은 무엇일까요?(2마리. ○나 ○○)", answer:["소 나귀"]},
+            {date:"7월25일",  from:"창 2:4-25", text:"하나님이 아담에게서 취하신 갈빗대로 만드신 그의 배필을 보고 아담은 무엇이라 비 유하였나요?", answer:["뼈중의 뼈 살중의 살"]},
+            {date:"7월26일",  from:"전도서 4:1-12", text:"전도서 4장에서 두 사람이 한 사람보다 낫다고 하는 이유는 무엇일까요?", answer:["그들이 수고함으로 좋은 상을 얻을 것이기 때문"]},
+            {date:"7월27일",  from:"골로새서 2:6-19", text:"골로새서 2장의 저자는 누군가의 철학과 혓된 속임수로 사로잡히는 것을 경계하라고 일컫습니다.\n이것은 그리스도가 아닌, 사람의 (1.)과 세상의 (2.)을 따름이기 때문인데요.\n괄호안의 단어는 무엇일까요?", answer:["전통", "초등학문"]},
+            {date:"7월28일",  from:"고린도전서 14:20-25", text:"지혜에는 아이가 되지 말고 악에는 (1) (이)가 되라 지혜에는 (2) (이)가 되라", answer:["어린 아이", "장성한 사람"]},
+            {date:"7월29일",  from:"시편 27", text:"다윗은 여호와께서 주의 도를 가르치시고 다윗의 원수를 생각하셔서 어디로 다윗을 인도하시기를 위해 기도했나요?", answer:["평탄한 길"]},
+            {date:"7월30일",  from:"이사야 40:12-31", text:"피곤한 자에게는 무엇을, 하나님을 앙망하는 자에게는 무엇을 얻을 수 있다고 말씀하시나요?", answer:["능력", "새 힘"]},
+            {date:"7월31일",  from:"요한복음 16:25-33", text:"요한복음 16장 25절부터 33절은 제자들이 예수님을 믿고 하나님께 나아가는 것에 대한 확신을 주는 부분입니다. 여기서 예수님은 '너희가 환난을 당하나 담대하라 이미 ○○○ ○○○' 라고 합니다. 이 문장은 무엇일까요?", answer:["세상을 이겼다"]},
+            {date:"8월1일",  from:"누가복음 8:16-18", text:"등불은 진리이신 예수 그리스도 입니다. 등불을 상 아래에 두지 아니하고 등경 위에 두라고 하신 이유를 무엇이라 하셨나요?", answer:["들어가는 자들로 빛을 보기 위함"]},
+            {date:"8월2일",  from:"야고보서 1:1-8", text:"야고보서 1장에서 여러 가지 시험을 당하거든 온전히 기쁘게 여기라고 한 이유는 무엇인가요?", answer:["인내를 만들기 위함"]},
+            {date:"8월3일",  from:"사도행전 1:6-11", text:"예수께서 이르시되 오직 (1. )이 임하시면 너희가 권능을 받고 땅끝까지 이르러 그분의 증인이 되리라고 하셨습다. 여기서 (1. )은 무엇일까요?", answer:["성령"]},
+            {date:"8월4일",  from:"잠언 16", text:"잠언 16장에 따르면, 하나님께서는 (1)라는 사람이 용사보다 낫고. (2)라는 사람이 성을 빼앗는 자보다 낫다고 말씀하십니다.", answer:["노하기를 더디하는 자", "자기 마음을 다스리는 자"]},
+            {date:"8월5일",  from:"야고보서 3", text:"여러 종류의 짐승과 새와 벌레와 바다의 생물은 다 사람이 길들일 수 있으나 사람이 능히 길들일 수 없는 것은 무엇일까요?", answer:["혀"]},
+            {date:"8월6일",  from:"민수기 6:22-27", text:"“여호와는 그의 얼굴을 네게 비추사 은혜 베푸시기를 원하며 여호와는 그 얼굴을 네게로 향하여 드사 ( ) 주시기를 원하노라 할지니라 하라“", answer:["평강"]},
+            {date:"8월7일",  from:"디모데전서 1:12-20", text:"바울은 예수님께서 자신에게 직분을 맡기신 이유에 대해 어떤 성품 때문이라고 이야기 하셨나요?", answer:["충성"]},
+            {date:"8월8일",  from:"데살로니가후서 3:6-15", text:"사도 바울은 게으르게 행하며, 일하지 않고 일을 만들기만 하는 자들에게 무엇이라 명하였나요?", answer:["조용히 일하여 자기양식을 먹으라"]},
+            {date:"8월9일",  from:"시편 72", text:"주는 가난한 자와 궁핍한 자가 부르짖을때에 ○○시며, ○○○ 여기며, 생명을 ○○ 하십니다.", answer:["건지", "불쌍히", "구원"]},
+            {date:"8월10일",  from:"스바냐 3:1-11", text:"여호와께서는 예루살렘 백성들에게 오직 그분을 (1.)하고 (2.)을 받으라고 하셨지만, 그들은 여전히 모든 행위를 더럽게 하였습니다", answer:["경외", "교훈"]},
+            {date:"8월11일",  from:"시편 120:1-7", text:"시편 120편의 저자는 화평을 미워하는 자들과 오래 거주하였던 것이 화가 되었다고 이야기합니다. 그뤟다면 이 저자가 화평을 미워하는 자들과 함께 거주한 두 장소는 어디일까요?", answer:["메섹", "게달의 장막"]},
+            {date:"8월12일",  from:"디모데전서 3", text:"사람이 하나님의 교회를 돌보기 전에 먼저 다스릴 줄 알아야 하는 것은 무엇일까요?", answer:["자기 집"]},
+            {date:"8월13일",  from:"사무엘하 22:28-37", text:"하나님께로 피하여 오는 자에게는 무엇이 되어 주신다고 말씀하시나요?", answer:["방패"]},
+            {date:"8월14일",  from:"예레미야 9:17-26", text:"예레미야 9장에선 여호와께서 이와 같이 말씀하셨다고 합니다. '지혜로운 자는 그의 지혜를 자랑하지 말라 ○○는 그의 ○○을 자랑하지 말라 ○○는 그의 ○○을 자랑하지 말라.'", answer:["용사", "용맹", "부자", "부함"]},
+            {date:"8월15일",  from:"레위기 19:9-16", text:"다음 중 재판할 때에 잘못된 것은?\n1. 불의를 행하지 말아야 한다.\n2. 가난한 자의 편을 들어야 한다.\n3. 세력있는 자라고 두둔하지 말아야 한다.", answer:["2"]},
+            {date:"8월16일",  from:"시편 64:1-10", text:"다윗은 하나님께 악을 1)○○○ 자들의 음모에서 다윗을 숨겨 주시고 악을 2)○○○ 자들의 소동에서 다윗을 감추어 달라고 노래한다.", answer:["꾀하는", "행하는"]},
+            {date:"8월17일",  from:"고린도후서 7:1-10", text:"하나님의 뜻대로 하는 근심은 후회할 것이 없는 구원에 이르게 하는 ○○(을)를 이루는 것입니다.", answer:["회개"]},
+            {date:"8월18일",  from:"미가 7:7-13", text:"미가 선지자는 어떠한 상황 속에서도 여호와 하나님을 우러러보며, ○○○○○ 하나님을 바라보겠다고 고백합니다. 그가 그럴 수 있는 까닭은 하나님께서는 그 소리에 귀를 기울이시는 분이시기 때문입니다.", answer:["구원하시는"]},
+            {date:"8월19일",  from:"마태복음 12:22-37", text:"바리새인들은 귀신을 쫓아내기 위해 누구의 힘을 입어야 한다고 하나요?", answer:["바알세불"]},
+            {date:"8월11일 설교",  from:"마가복음 2:1-12", text:"(설교) 중풍병자에게 네 ○ ○○을 받았느니라 하는 말과 일어나 네 상을 가지고 걸어가라 하는 말 중에서 어느 것이 쉽겠느냐", answer:["죄 사함"]},
+            {date:"8월11일 설교",  from:"마가복음 2:1-12", text:"(설교) 그러나 인자가 땅에서 ○○ ○○○ ○○가 있는 줄을 너희로 알게 하려 하노라 하시고 중풍병자에게 말씀하시되", answer:["죄를 사하는 권세"]},
+            {date:"8월18일 설교",  from:"에베소서 2:22", text:"(설교) 너희도 ○○ 안에서 하나님이 거하실 ○○가 되기 위하여 ○○○○ ○○ 안에서 함께 지어져 가느니라", answer:["성령", "처소", "그리스도 예수"]},
+        ];
+        var questionOrders = []
+
+        const goNextQuestsion = function() {
+            document.getElementById('answers').innerHTML = ""
+            current_question = questionOrders[question_counter]
+
+            if (current_question == null) {
+                document.getElementById("start").style.display = "";
+                document.getElementById("questions").style.display = "None";
+
+                alert("문제 : " + question_counter + "개, 정답 : " + answer_counter + " 개")
+            }
+            else {
+                question_counter += 1
+                document.getElementById("question_number").innerText = "#" + question_counter + ' (' + current_question.from + ')';
+                document.getElementById("question_text").innerText = current_question.text;
+                var tab_counter = 1
+
+                for (const index in current_question.answer) {
+                    // 정답 입력칸 정답수에 맞춰서 만들어주기, answers div에 넣기
+                    var inputs = ""
+                    const answer = current_question.answer[index]
+                    const answer_splitted = answer.split(" ")
+                    for (const answer_index in answer_splitted) {
+                        const local_answer = answer_splitted[answer_index]
+                        inputs += '<input type="text" id="answer' + index + '_' + answer_index + '" class="answers" style="width:' + 14 * local_answer.length  + 'px" tabindex="' + tab_counter + 'px" onkeydown="answerKeydown(event, ' + index + ', ' + answer_index + ')"></input>'
+                        tab_counter += 1
+                    }
+                    document.getElementById('answers').innerHTML += '<li class="margin2">' + inputs + '</li>';
+                }
+            }
+        }
+
+        const answerKeydown = function(event, index, answer_index) {
+            if (event.keyCode === 32 || event.keyCode === 13) {
+                event.preventDefault()
+                const target_input = document.getElementById('answer' + index + '_' + (answer_index + 1)) || document.getElementById('answer' + (index + 1) + '_' + 0)
+                if (target_input) {
+                    target_input.focus()
+                }
+                else if (event.keyCode === 13) {
+                    checkAnswer()
+                }
+            }
+        }
+
+        const checkAnswer = function() {
+            // 정답 체크해서 answer_counter 증가 및 정답 여부 팝업 띄워주기
+            var correct = true
+            var answer_text = ""
+
+            for (const index in current_question.answer) {
+                const answer = current_question.answer[index]
+                const answer_splitted = answer.split(" ")
+                for (const answer_index in answer_splitted) {
+                    const local_answer = answer_splitted[answer_index]
+                    correct = correct && document.getElementById('answer' + index + '_' + answer_index).value == local_answer
+                }
+
+                answer_text += (Number(index) + 1) + ". " + answer + " "
+            }
+
+            if (correct) {
+                alert("정답")
+                answer_counter += 1
+            } else {
+                alert("정답은 [" + answer_text + "] 입니다.")
+            }
+            goNextQuestsion()
+        }
+
+        // from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+        function shuffle(array) {
+            let currentIndex = array.length;
+
+            // While there remain elements to shuffle...
+            while (currentIndex != 0) {
+
+                // Pick a remaining element...
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+            }
+        }
+
+        const shuffleClone = function(targetArray) {
+            const cloned = structuredClone(targetArray)
+            shuffle(cloned)
+
+            return cloned
+        }
+
+        const onclickStart = function() {
+            document.getElementById("start").style.display = "None";
+            document.getElementById("questions").style.display = "";
+            const doShuffle = document.getElementById("shuffle").checked
+            if (doShuffle) {
+                questionOrders = shuffleClone(data)
+            }
+            else {
+                questionOrders = data
+            }
+            question_counter = 0;
+            answer_counter = 0;
+
+            goNextQuestsion()
+        }
+
+    </script>
+</html>
